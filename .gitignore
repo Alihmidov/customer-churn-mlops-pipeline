@@ -26,7 +26,6 @@ ENV/
 
 # Environment variables (Security!)
 .env
-.env.example
 
 # Jupyter Notebook
 .ipynb_checkpoints/
