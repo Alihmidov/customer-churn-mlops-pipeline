@@ -1,0 +1,28 @@
+# --- Python Cache ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+
+# --- Git ---
+.git
+.gitignore
+
+# --- Data & Notebooks ---
+data/
+notebooks/
+
+# --- ML Artifacts ---
+mlruns/
+catboost_info/
+
+# --- Environment & Settings ---
+.env
+.vscode/
+.idea/
+.DS_Store
+
+# --- Logs ---
+*.log
