@@ -1,0 +1,13 @@
+{
+  "CustomerID": 1,
+  "Age": 35,
+  "Gender": "Male",
+  "Tenure": 12,
+  "Usage Frequency": 15,
+  "Support Calls": 2,
+  "Payment Delay": 0,
+  "Subscription Type": "Standard",
+  "Contract Length": "Annual",
+  "Total Spend": 1200.50,
+  "Last Interaction": 5
+}
