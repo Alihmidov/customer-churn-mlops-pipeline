@@ -41,10 +41,11 @@ Thumbs.db
 
 # MLOps & Data Specific (CRITICAL)
 # Ignore data files but keep the directory structure
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
+data/**/*.csv
+data/**/*.parquet
+data/**/*.pkl
+!data/**/.gitkeep
+!data/**/*.dvc
 
 # MLflow experiments and tracking
 mlruns/
