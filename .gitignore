@@ -18,6 +18,10 @@ var/
 wheels/
 *.egg-info/
 
+# Logs
+logs/
+*.log
+
 # Virtual Environments (uv, venv, conda)
 .venv/
 venv/
