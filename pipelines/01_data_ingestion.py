@@ -6,7 +6,7 @@ from utils.loggers_config import logger
 def ingest_data():
     try:
         engine = get_db_engine()
-        logger.info("Database connection successful.") # <--- print əvəzinə logger.info
+        logger.info("Database connection successful.") 
 
         df_train = pd.read_csv(settings.RAW_DATA_TRAINING_PATH)
         df_train.to_sql("raw_train_data", engine, if_exists="replace", index=False)
