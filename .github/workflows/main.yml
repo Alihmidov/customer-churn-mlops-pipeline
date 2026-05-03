@@ -49,7 +49,7 @@ jobs:
           DB_NAME: churn_db
           DB_HOST: localhost
           DB_PORT: 5432
-          RAW_DATA_TRAINING_PATH: tests/fixtures/sample_train.csv
+          RAW_DATA_TRAINING_PATH: tests/fixtures/sample_training.csv
           RAW_DATA_TESTING_PATH: tests/fixtures/sample_testing.csv
         run: |
           uv run pipelines/01_data_ingestion.py
