@@ -1,9 +1,26 @@
 import pandas as pd
-from utils.helpers import get_db_engine
 from config.settings import settings
+from utils.helpers import get_db_engine
 from utils.loggers_config import logger 
 
+def fetch_data_from_db(table_name="raw_train_data"):
+    """
+    Fetches data from the specified table in the database.
+    This is the function we mock in our tests.
+    """
+    try:
+        engine = get_db_engine()
+        query = f"SELECT * FROM {table_name}"
+        df = pd.read_sql(query, engine)
+        return df
+    except Exception as e:
+        logger.error(f"Error fetching data from {table_name}: {e}")
+        return pd.DataFrame()
+
 def ingest_data():
+    """
+    Reads raw CSV files and loads them into the PostgreSQL database.
+    """
     try:
         engine = get_db_engine()
         logger.info("Database connection successful.") 
