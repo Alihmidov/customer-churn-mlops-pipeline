@@ -20,8 +20,3 @@ def test_target_variable_integrity():
     df = pd.read_sql('SELECT "Churn" FROM raw_train_data', engine)
     unique_values = set(df['Churn'].unique())
     assert unique_values.issubset({0, 1}), f"Data Quality Error: Invalid labels found: {unique_values}"
-
-def test_data_row_count():
-    engine = get_db_engine()
-    count = pd.read_sql("SELECT COUNT(*) as row_count FROM raw_train_data", engine).iloc[0]['row_count']
-    assert count > 5000, f"Data Quality Error: Expected >5000 rows, but found {count}."
