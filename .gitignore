@@ -62,3 +62,5 @@ models/artifacts/*
 .docker/
 
 !tests/fixtures/*.csv
+
+*.session.sql
