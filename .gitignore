@@ -64,3 +64,11 @@ models/artifacts/*
 !tests/fixtures/*.csv
 
 *.session.sql
+
+.pytest_cache/
+
+mlflow.db
+mlartifacts/
+*.db
+__pycache__/
+.env
