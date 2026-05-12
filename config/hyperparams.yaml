@@ -5,3 +5,19 @@ xgboost:
   random_state: 42
   use_label_encoder: false
   eval_metric: "logloss"
+
+logistic_regression:
+  max_iter: 1000
+  random_state: 42
+
+random_forest:
+  n_estimators: 100
+  max_depth: 10
+  random_state: 42
+
+catboost:
+  iterations: 500
+  learning_rate: 0.1
+  depth: 6
+  random_state: 42
+  verbose: 0
