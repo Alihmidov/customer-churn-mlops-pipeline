@@ -72,3 +72,9 @@ mlartifacts/
 *.db
 __pycache__/
 .env
+
+# CatBoost logs and temp files
+catboost_info/
+
+# Large model files
+models/*.cbm
