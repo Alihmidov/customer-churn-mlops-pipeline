@@ -78,3 +78,5 @@ catboost_info/
 
 # Large model files
 models/*.cbm
+models/*.pkl
+models/artifacts/
