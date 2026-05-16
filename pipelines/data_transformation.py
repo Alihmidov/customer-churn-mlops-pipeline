@@ -69,8 +69,8 @@ def transform_data():
         engine = get_db_engine()
         logger.info("Successfully connected to the database for transformation.")
 
-        logger.info("Loading raw training data from PostgreSQL...")
-        raw_df = pd.read_sql("SELECT * FROM raw_train_data", engine)
+        logger.info("Loading processed training data from PostgreSQL...")
+        raw_df = pd.read_sql("SELECT * FROM processed_train_data", engine)
 
         cleaned_df = clean_data(raw_df)
         final_df = apply_feature_engineering(cleaned_df)
