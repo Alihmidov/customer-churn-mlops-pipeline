@@ -8,7 +8,7 @@ from utils.helpers import get_db_engine
 
 def test_target_variable_integrity():
     engine = get_db_engine()
-    df = pd.read_sql('SELECT "Churn" FROM processed_churn_train', engine)
+    df = pd.read_sql('SELECT "Churn" FROM processed_churn_data', engine)
     
     unique_values = set(df['Churn'].unique())
     assert unique_values.issubset({0, 1}), f"Data Quality Error: Invalid labels found: {unique_values}"
