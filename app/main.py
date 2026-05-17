@@ -1,9 +1,10 @@
 import os
 from fastapi import FastAPI
+# main.py kökdə olduğu üçün app/ qovluğundan bu cür import etməlidir:
 from app.routes.api import router as api_router
 
 ENV = os.getenv("ENV", "development")
-MODEL_PATH = os.getenv("MODEL_PATH", "models/catboost_model.cbm")
+MODEL_PATH = os.getenv("MODEL_PATH", "models/catboost_churn_model.cbm")
 
 app = FastAPI(
     title="Customer Churn Prediction Service",

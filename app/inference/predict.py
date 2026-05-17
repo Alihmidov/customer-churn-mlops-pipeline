@@ -5,10 +5,30 @@ from app.schemas.request_body import CustomerChurnInput
 from pipelines.data_transformation import clean_data, apply_feature_engineering
 
 class ChurnPredictor:
-    def __init__(self, model_path: str = "models/catboost_churn_model.cbm"):
+    def __init__(self, model_path: str = None):
+        # 1. Əgər model_path ötürülməyibsə, mühit dəyişənini yoxlayırıq
+        if model_path is None:
+            model_path = os.getenv("MODEL_PATH")
+        
+        # 2. Docker daxilində tam, dəqiq və zəmanətli mütləq ünvanı (Absolute path) təyin edirik
+        if not model_path:
+            # predict.py-dan (app/inference/predict.py) düzgün şəkildə 2 addım geri qayıdırıq
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            # Layihənin əsl kök qovluğundan models qovluğuna keçid edirik
+            model_path = os.path.normpath(os.path.join(base_dir, "..", "models", "catboost_churn_model.cbm"))
+            
+        # Əgər Docker daxilində hər hansı səbəbdən yol yenə çaşsa, birbaşa workspace yolunu məcburi mənimsədirik
+        if not os.path.exists(model_path) and os.path.exists("/workspace/models/catboost_churn_model.cbm"):
+            model_path = "/workspace/models/catboost_churn_model.cbm"
+        
         self.model = CatBoostClassifier()
+        
+        # 3. Yoxlama loqu (Render loglarında dəqiq haradan oxuduğunu görəcəksən)
+        print(f"--- LOADING CATBOOST MODEL FROM: {model_path} ---")
+        
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model file not found at: {model_path}")
+            
         self.model.load_model(model_path)
         self.model_features = self.model.feature_names_
 
