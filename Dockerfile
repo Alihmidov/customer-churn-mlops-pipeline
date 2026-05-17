@@ -3,14 +3,15 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /workspace
 
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
-
+# Asılılıqları kopyalayırıq və quraşdırırıq
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-cache
+RUN uv sync --frozen
 
+# Bütün layihəni (və içindəki models/ qovluğunu) imicə kopyalayırıq
 COPY . .
 
+# Python-un app qovluğunu tapması üçün mühit dəyişəni
 ENV PYTHONPATH=/workspace
-ENV MODEL_PATH=/workspace/models/catboost_churn_model.cbm
 
-CMD ["sh", "-c", "uv run dvc pull && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# Birbaşa FastAPI tətbiqini başladırıq
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
