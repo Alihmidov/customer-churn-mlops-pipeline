@@ -54,3 +54,8 @@ jobs:
         run: |
           uv run pipelines/data_ingestion.py
           uv run pytest tests/test_data_quality.py
+          uv run pipelines/data_preprocessing.py
+          uv run pytest tests/test_data_preprocessing.py
+          uv run pipelines/model_training.py
+          uv run pipelines/model_evaluation.py
+          uv run pytest tests/test_model_performance.py
