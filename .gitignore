@@ -80,3 +80,5 @@ catboost_info/
 models/*.cbm
 models/*.pkl
 models/artifacts/
+models/*.json
+models/*.png

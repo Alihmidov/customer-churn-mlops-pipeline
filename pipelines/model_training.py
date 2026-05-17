@@ -4,12 +4,13 @@ import pandas as pd
 import yaml
 import mlflow
 import mlflow.catboost
-from catboost import CatBoostClassifier
-from sklearn.model_selection import train_test_split
-from config.settings import settings
-from utils.loggers_config import logger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
+
+from config.settings import settings
+from utils.loggers_config import logger
+from catboost import CatBoostClassifier
+from sklearn.model_selection import train_test_split
 
 def load_hyperparameters():
     try:
@@ -23,9 +24,24 @@ def load_hyperparameters():
 def get_prepared_data():
     df = pd.read_csv("data/processed/engineered_churn_data.csv")
     
-    target = 'churn' if 'churn' in df.columns else 'Churn'
+    if 'churn' in df.columns:
+        target = 'churn'
+    elif 'Churn' in df.columns:
+        target = 'Churn'
+    else:
+        raise KeyError("Target column ('churn' or 'Churn') not found in the dataset!")
+
+    df = df.reset_index(drop=True)
+
+    if df[target].isnull().sum() > 0:
+        logger.warning(f"Target '{target}' contained {df[target].isnull().sum()} NaN values! Dropping them now.")
+        df = df.dropna(subset=[target])
+        df = df.reset_index(drop=True)
+
     X = df.drop(columns=[target])
-    y = df[target]
+    y = df[target].astype(int) 
+
+    X = X.fillna(0)
     
     return train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
@@ -41,14 +57,18 @@ def train_pipeline():
         with mlflow.start_run(run_name="CatBoost_Production_Run"):
             logger.info("Starting model training...")
             
-            model = CatBoostClassifier(**params, verbose=100, random_seed=42)
+            model = CatBoostClassifier(**params)
             model.fit(X_train, y_train, eval_set=(X_val, y_val), early_stopping_rounds=50)
 
             mlflow.log_params(params)
             mlflow.log_metric("train_accuracy", model.score(X_train, y_train))
             mlflow.log_metric("validation_accuracy", model.score(X_val, y_val))
 
-            mlflow.catboost.log_model(model, artifact_path="model")
+            mlflow.catboost.log_model(
+                cb_model=model, 
+                name="model", 
+                pip_requirements=["catboost", "pandas", "numpy"]
+            )
             
             os.makedirs("models", exist_ok=True)
             model.save_model("models/catboost_churn_model.cbm")

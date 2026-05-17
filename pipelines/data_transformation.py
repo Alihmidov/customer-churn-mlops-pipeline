@@ -17,7 +17,17 @@ def clean_data(df):
     if 'CustomerID' in df.columns:
         df = df.drop(['CustomerID'], axis=1)
     
+    target = 'churn' if 'churn' in df.columns else 'Churn'
+    if target in df.columns:
+        df = df.dropna(subset=[target])
+    
     df['Contract Length'] = df['Contract Length'].replace('None', 0)
+
+    target = 'churn' if 'churn' in df.columns else 'Churn'
+    if target in df.columns:
+        initial_count = len(df)
+        df = df.dropna(subset=[target])
+        logger.info(f"Target column cleaning: Dropped {initial_count - len(df)} rows containing NaN.")
 
     le = LabelEncoder()
     df['Contract Length'] = le.fit_transform(df['Contract Length'].astype(str))
@@ -49,7 +59,6 @@ def apply_feature_engineering(df):
     df['is_passive_user'] = (df['Last Interaction'] > 15).astype(int)
     df['is_low_usage'] = (df['Usage Frequency'] < 10).astype(int)
     
-    
     max_tenure = max(df['Tenure'].max(), 61)
     
     df['tenure_segment'] = pd.cut(
@@ -69,8 +78,8 @@ def transform_data():
         engine = get_db_engine()
         logger.info("Successfully connected to the database for transformation.")
 
-        logger.info("Loading processed training data from PostgreSQL...")
-        raw_df = pd.read_sql("SELECT * FROM processed_train_data", engine)
+        logger.info("Loading raw training data from PostgreSQL...")
+        raw_df = pd.read_sql("SELECT * FROM raw_train_data", engine)
 
         cleaned_df = clean_data(raw_df)
         final_df = apply_feature_engineering(cleaned_df)
