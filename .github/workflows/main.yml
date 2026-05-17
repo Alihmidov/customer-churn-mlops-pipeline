@@ -53,7 +53,7 @@ jobs:
           RAW_DATA_TESTING_PATH: tests/fixtures/sample_testing.csv
         run: |
           uv run pipelines/data_ingestion.py
-          uv run pipelines/data_preprocessing.py
+          uv run pipelines/data_transformation.py
           uv run pipelines/model_training.py
           uv run pipelines/model_evaluation.py
           
