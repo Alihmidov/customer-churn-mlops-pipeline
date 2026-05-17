@@ -1,13 +1,30 @@
-{
-  "CustomerID": 1,
-  "Age": 35,
-  "Gender": "Male",
-  "Tenure": 12,
-  "Usage Frequency": 15,
-  "Support Calls": 2,
-  "Payment Delay": 0,
-  "Subscription Type": "Standard",
-  "Contract Length": "Annual",
-  "Total Spend": 1200.50,
-  "Last Interaction": 5
-}
+[
+  {
+    "_comment_scenario": "SCENARIO A: Loyalist / Active Customer. This customer profile represents low risk of churn (Young, Premium subscription, Annual contract, High usage and spend, Zero support complaints). Expected output: churn_prediction=0, status='Active'",
+    "CustomerID": 999001,
+    "Age": 25,
+    "Gender": "Male",
+    "Tenure": 24,
+    "Usage Frequency": 28,
+    "Support Calls": 0,
+    "Payment Delay": 1,
+    "Subscription Type": "Premium",
+    "Contract Length": "Annual",
+    "Total Spend": 850.00,
+    "Last Interaction": 2
+  },
+  {
+    "_comment_scenario": "SCENARIO B: High Churn Risk Customer. This customer profile represents severe warning signs (Older age, Monthly contract, Basic plan, Low usage, Extremely high support calls, and 25 days payment delay). Expected output: churn_prediction=1, status='At Risk'",
+    "CustomerID": 999002,
+    "Age": 55,
+    "Gender": "Female",
+    "Tenure": 2,
+    "Usage Frequency": 3,
+    "Support Calls": 6,
+    "Payment Delay": 25,
+    "Subscription Type": "Basic",
+    "Contract Length": "Monthly",
+    "Total Spend": 45.50,
+    "Last Interaction": 28
+  }
+]
