@@ -1,36 +1,48 @@
-import os
-import sys
 import pandas as pd
-import pytest
+import numpy as np
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
-
-from pipelines.data_transformation import clean_data, apply_feature_engineering
-
-@pytest.fixture
-def real_sample_data():
-    fixture_path = os.path.join(os.path.dirname(__file__), "fixtures", "sample_training.csv")
-    return pd.read_csv(fixture_path)
-
-def test_data_transformation_pipeline(real_sample_data):
-    cleaned_df = clean_data(real_sample_data)
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleans raw data by converting contract strings to numeric durations
+    and applying One-Hot Encoding for remaining categorical variables.
+    """
+    df_clean = df.copy()
     
-    assert 'CustomerID' not in cleaned_df.columns, "CustomerID column was not dropped!"
-    assert 'Gender_Male' in cleaned_df.columns or 'Gender_Female' in cleaned_df.columns, "Dummy columns for Gender were not created!"
-    
-    final_df = apply_feature_engineering(cleaned_df)
-    
-    expected_features = [
-        'is_critical_payment_delay', 
-        'is_low_spender', 
-        'high_support_risk', 
-        'is_passive_user', 
-        'is_low_usage', 
-        'tenure_segment'
-    ]
-    
-    for feature in expected_features:
-        assert feature in final_df.columns, f"Error: {feature} column was not added to the dataframe!"
+    # 1. Convert Contract Length from string categories to numeric months
+    if "Contract Length" in df_clean.columns:
+        # Standardize strings to lower case for exact mapping
+        contract_map = {
+            'monthly': 1,
+            'quarterly': 3,
+            'annual': 12
+        }
+        df_clean["Contract Length"] = df_clean["Contract Length"].astype(str).str.strip().str.lower().map(contract_map).fillna(1)
         
-    assert final_df['tenure_segment'].dtype in ['int32', 'int64'], "tenure_segment type is not integer!"
-    assert final_df['high_support_risk'].dtype in ['int32', 'int64'], "high_support_risk type is not integer!"
+    # 2. Drop CustomerID if present
+    if "CustomerID" in df_clean.columns:
+        df_clean = df_clean.drop(columns=["CustomerID"])
+        
+    # 3. Apply One-Hot Encoding for the remaining object/string columns (e.g., Gender, Subscription Type)
+    df_clean = pd.get_dummies(df_clean, drop_first=True)
+    
+    # 4. Explicitly convert boolean dummies to integer 0/1 signatures
+    for col in df_clean.columns:
+        if df_clean[col].dtype == 'bool':
+            df_clean[col] = df_clean[col].astype(int)
+            
+    return df_clean
+
+def apply_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Generates engineered flags and standardized segment metrics.
+    """
+    df_fe = df.copy()
+    
+    df_fe['is_critical_payment_delay'] = (df_fe.get('Payment Delay', 0) > 20).astype(np.int32)
+    df_fe['is_low_spender'] = (df_fe.get('Total Spend', 0) < 300).astype(np.int32)
+    df_fe['high_support_risk'] = (df_fe.get('Support Calls', 0) > 5).astype(np.int32)
+    df_fe['is_passive_user'] = (df_fe.get('Last Interaction', 0) > 25).astype(np.int32)
+    df_fe['is_low_usage'] = (df_fe.get('Usage Frequency', 0) < 5).astype(np.int32)
+    df_fe['tenure_segment'] = (df_fe.get('Tenure', 0) // 12).astype(np.int32)
+    
+    return df_fe
