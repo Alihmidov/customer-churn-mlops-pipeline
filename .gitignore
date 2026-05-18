@@ -77,4 +77,6 @@ __pycache__/
 catboost_info/
 
 # Large model files
-models/*
+models/*.dvc
+models/*.json
+models/*.png
