@@ -1,27 +1,35 @@
-# Customer Churn Prediction (MLOps Pipeline)
-
-[![Project Repository](https://img.shields.io/badge/Project-Repository-blue?style=flat-square&logo=github)](https://github.com/Alihmidov/customer-churn-mlops-pipeline)
-[![Github Profile](https://img.shields.io/badge/Github-Profile-black?style=flat-square&logo=github)](https://github.com/Alihmidov)
-
+Customer Churn Prediction (MLOps Pipeline)
+Show Image
+Show Image
 This repository contains an end-to-end Machine Learning pipeline to predict customer churn. The model is built using CatBoost, served via FastAPI, containerized with Docker, and managed using uv.
-
-## Live API Endpoints
+Live API Endpoints
 The service is deployed on Render and accepts requests at these links:
-* **Production Base URL:** https://customer-churn-api-pz8n.onrender.com
-* **Interactive API Docs (Swagger UI):** https://customer-churn-api-pz8n.onrender.com/docs
 
----
+Production Base URL: https://customer-churn-api-pz8n.onrender.com
+Interactive API Docs (Swagger UI): https://customer-churn-api-pz8n.onrender.com/docs
 
-## Model Performance & Proof of Concept
 
-### 1. Training Metrics
-The CatBoost model shows the following evaluation metrics:
-* **Accuracy:** 98.72%
-* **ROC AUC Score:** 0.9888
+Architectural Decisions
+Why CatBoost?
 
-**Classification Report:**
+Categorical features: CatBoost handles categorical splits natively during training, removing the need for One-Hot Encoding and reducing data leakage risks.
+Overfitting resistance: Built-in ordered boosting prevents target leakage, allowing the model to generalize well on the ~440k dataset without heavy hyperparameter tuning.
+Deployment speed: Models serialize into lightweight .cbm binary files, resulting in fast inference inside the production API.
 
-```text
+Why FastAPI instead of Flask/Django?
+
+Async performance: Built on Starlette and Uvicorn, FastAPI handles concurrent prediction requests without blocking.
+Pydantic validation: Inputs are type-checked at the gateway layer. Invalid payloads are blocked with HTTP 422 errors before reaching inference logic.
+Auto documentation: Swagger UI is generated automatically, simplifying testing and integration.
+
+
+Model Performance
+Training Metrics
+
+Accuracy: 98.72%
+ROC AUC Score: 0.9888
+
+Classification Report:
               precision    recall  f1-score   support
 
            0       0.97      1.00      0.99     38044
@@ -32,85 +40,73 @@ The CatBoost model shows the following evaluation metrics:
 weighted avg       0.99      0.99      0.99     88167
 
 Confusion Matrix:
-Plaintext
-
 [[38044     0]
  [ 1124 48999]]
+Production API Live Test (Swagger UI)
+![Swagger UI - Request](https://github.com/Alihmidov/customer-churn-mlops-pipeline/blob/main/assets/swagger_ui_request.png?raw=true)
+![Swagger UI - Response](https://github.com/Alihmidov/customer-churn-mlops-pipeline/blob/main/assets/swagger_ui_response.png?raw=true)
 
-2. Production API Live Test (Swagger UI)
+Project Architecture
+1. SQL & Data Ingestion Layer
 
-Below is the execution instance verifying that the live cloud API successfully parses incoming JSON payloads and yields fast, correct predictions:
-Project Architecture & Workflow
+Wrote PostgreSQL queries inside sql/analysis.sql to analyze raw data and verify constraints.
+Built data_ingestion.py to connect to the live PostgreSQL instance and extract the dataset.
 
-    SQL Pre-modeling Layer: Initial data analysis and database constraints were handled inside sql/analysis.sql on the PostgreSQL data layer.
+2. Exploratory Data Analysis
 
-    Experimental Layer: Data cleaning, EDA, and features were prototyped inside Jupyter notebooks (.ipynb).
+Evaluated class balance and feature distributions inside Jupyter notebooks.
+Used boxplots for outlier detection across all numerical columns.
 
-    Production Pipelines: Operational steps are automated using Python scripts:
+3. Feature Engineering
 
-        data_ingestion.py: Connects to PostgreSQL and extracts data.
+Created binary risk flags in data_transformation.py:
 
-        data_transformation.py: Formulates feature mapping including age groups, passive user flags, and risk indicators like payment lags (Payment Delay > 20).
+Age group segmentation
+Passive user flags based on engagement
+Critical payment delay indicator (Payment Delay > 20)
 
-    Containerized Deployment: FastAPI loads the trained model weights into memory when the application starts and serves requests inside a Docker container.
+
+
+4. Containerization & Deployment
+
+Replaced pip with uv for fast, deterministic dependency management.
+Deployed FastAPI via Docker container on Render.
+
 
 Repository Structure
-Plaintext
-
 customer-churn-mlops-pipeline/
-├── .github/workflows/main.yml  # GitHub Actions automated test suite
-├── app/                        # FastAPI Web Application
-│   ├── inference/predict.py    # Model loader and class wrapper
-│   ├── routes/api.py           # Core POST endpoint route mapping
-│   └── schemas/request_body.py # Pydantic data validation models
-├── assets/                     # Screenshots for documentation
-├── models/                     # Serialized CatBoost model file (.cbm)
-├── notebooks/                  # Experimental EDA and training iterations
-├── pipelines/                  # Data ingestion and transformation pipelines
-├── sql/                        # SQL scripts for database analysis
-├── tests/                      # Pytest test cases
-├── Dockerfile                  # Production Docker configuration
-├── pyproject.toml / uv.lock    # Python dependencies managed by uv
+├── .github/workflows/main.yml   # GitHub Actions CI/CD
+├── app/
+│   ├── inference/predict.py     # Model loader and inference logic
+│   ├── routes/api.py            # POST endpoint
+│   └── schemas/request_body.py  # Pydantic validation
+├── assets/                      # Screenshots
+├── models/                      # CatBoost model file (.cbm)
+├── notebooks/                   # EDA and training notebooks
+├── pipelines/                   # Data ingestion and transformation
+├── sql/                         # PostgreSQL analysis scripts
+├── tests/                       # Pytest test suite
+├── Dockerfile
+├── pyproject.toml / uv.lock
 └── README.md
 
-Local Environment Setup
-
-Make sure Python 3.12 and the uv tool are installed on your machine.
-1. Synchronize Virtual Environment
-Bash
-
+Local Setup
+Python 3.12 and uv required.
+bash# Install dependencies
 uv sync --frozen
 
-2. Run Feature Transformation
-Bash
-
+# Run data transformation
 uv run python pipelines/data_transformation.py
 
-3. Start Local FastAPI Instance
-Bash
-
+# Start local API
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+Test at http://localhost:8000/docs.
 
-You can test the local API at http://localhost:8000/docs.
-Docker Deployment
-
-You can build and run the application standalone using Docker:
-Bash
-
-# Build the application image
-docker build -t customer-churn-api .
-
-# Run the inference layer standalone
+Docker
+bashdocker build -t customer-churn-api .
 docker run -p 8000:8000 customer-churn-api
+For FastAPI + MLflow together:
+bashdocker-compose up --build
 
-To run both FastAPI and MLflow services together:
-Bash
-
-docker-compose up --build
-
-Testing Guardrails
-
-Run the test suite with pytest to check code health and API schemas:
-Bash
-
-uv run pytest tests/
+Tests
+bashuv run pytest tests/
