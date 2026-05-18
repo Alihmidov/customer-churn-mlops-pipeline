@@ -42,6 +42,7 @@ weighted avg       0.99      0.99      0.99     88167
 Confusion Matrix:
 [[38044     0]
  [ 1124 48999]]
+
 Production API Live Test (Swagger UI)
 ![Swagger UI - Request](https://github.com/Alihmidov/customer-churn-mlops-pipeline/blob/main/assets/swagger_ui_request.png?raw=true)
 ![Swagger UI - Response](https://github.com/Alihmidov/customer-churn-mlops-pipeline/blob/main/assets/swagger_ui_response.png?raw=true)
