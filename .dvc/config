@@ -1,4 +1,7 @@
 [core]
-    remote = myremote
+    remote = gdrive
 ['remote "myremote"']
     url = C:\dvc_storage
+['remote "gdrive"']
+    url = gdrive://FOLDER_ID
+    gdrive_acknowledge_abuse = true
