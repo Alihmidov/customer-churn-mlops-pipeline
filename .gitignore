@@ -77,7 +77,6 @@ __pycache__/
 catboost_info/
 
 # Large model files
-models/*.cbm
-models/*.dvc
+models/catboost_churn_model.cbm
 models/*.json
 models/*.png

@@ -1,0 +1,5 @@
+outs:
+- md5: 8028e9653792df2666f0094449d1fcad
+  size: 582728
+  hash: md5
+  path: catboost_churn_model.cbm
