@@ -1,116 +1,76 @@
 Customer Churn Prediction (MLOps Pipeline)
 
-This repository contains an end-to-end Machine Learning pipeline to predict customer churn. The model is built using CatBoost, served via FastAPI, containerized with Docker, and managed using uv.
+This repository contains an end-to-end Machine Learning pipeline to predict customer churn. The project emphasizes production-ready practices, including containerized deployment, remote model management, and CI/CD automation.
+
 Live API Endpoints
 
-The service is deployed on Render and accepts requests at these links:
+The service is deployed on Render and is ready for inference:
 
     Production Base URL: https://customer-churn-api-pz8n.onrender.com
+
     Interactive API Docs (Swagger UI): https://customer-churn-api-pz8n.onrender.com/docs
 
 Architectural Decisions
+Model Management Strategy
+
+To ensure a clean repository and follow production best practices, the model is not stored in Git. Instead, it is hosted on Hugging Face Hub and fetched dynamically during the API startup using huggingface_hub. This allows for seamless model updates without re-deploying the entire codebase.
 Why CatBoost?
 
-    Categorical features: CatBoost handles categorical splits natively during training, removing the need for One-Hot Encoding and reducing data leakage risks.
-    Overfitting resistance: Built-in ordered boosting prevents target leakage, allowing the model to generalize well on the ~440k dataset without heavy hyperparameter tuning.
-    Deployment speed: Models serialize into lightweight .cbm binary files, resulting in fast inference inside the production API.
+    Categorical features: Native handling of categorical variables removes the need for complex pre-processing.
 
-Why FastAPI instead of Flask/Django?
+    Robustness: Built-in ordered boosting prevents target leakage and overfitting.
 
-    Async performance: Built on Starlette and Uvicorn, FastAPI handles concurrent prediction requests without blocking.
-    Pydantic validation: Inputs are type-checked at the gateway layer. Invalid payloads are blocked with HTTP 422 errors before reaching inference logic.
-    Auto documentation: Swagger UI is generated automatically, simplifying testing and integration.
+    Inference speed: Binary .cbm files are highly optimized for fast, real-time predictions.
+
+Why FastAPI?
+
+    High Performance: Async support for concurrent request handling.
+
+    Type Safety: Pydantic validation ensures incoming payloads match the expected schema.
+
+    Documentation: Auto-generated Swagger UI simplifies integration.
 
 Model Performance
-Training Metrics
 
     Accuracy: 98.72%
+
     ROC AUC Score: 0.9888
 
-Classification Report:
-
-              precision    recall  f1-score   support
-
-           0       0.97      1.00      0.99     38044
-           1       1.00      0.98      0.99     50123
-
-    accuracy                           0.99     88167
-   macro avg       0.99      0.99      0.99     88167
-weighted avg       0.99      0.99      0.99     88167
-
-Confusion Matrix:
-[[38044     0]
- [ 1124 48999]]
-
-Production API Live Test (Swagger UI)
-
-Swagger UI Request Swagger UI Response
-Project Architecture
-
-1. SQL & Data Ingestion Layer
-
-    Wrote PostgreSQL queries inside sql/analysis.sql to analyze raw data and verify constraints.
-    Built data_ingestion.py to connect to the live PostgreSQL instance and extract the dataset.
-
-2. Exploratory Data Analysis
-
-    Evaluated class balance and feature distributions inside Jupyter notebooks.
-    Used boxplots for outlier detection across all numerical columns.
-
-3. Feature Engineering
-
-    Created binary risk flags in data_transformation.py:
-        Age group segmentation
-        Passive user flags based on engagement
-        Critical payment delay indicator (Payment Delay > 20)
-
-4. Containerization & Deployment
-
-    Replaced pip with uv for fast, deterministic dependency management.
-    Deployed FastAPI via Docker container on Render.
-
 Repository Structure
+Plaintext
 
 customer-churn-mlops-pipeline/
-├── .github/workflows/main.yml   # GitHub Actions CI/CD
+├── .github/workflows/main.yml    # CI/CD pipeline
 ├── app/
-│   ├── inference/predict.py     # Model loader and inference logic
-│   ├── routes/api.py            # POST endpoint
-│   └── schemas/request_body.py  # Pydantic validation
-├── assets/                      # Screenshots
-├── models/                      # CatBoost model file (.cbm)
-├── notebooks/                   # EDA and training notebooks
-├── pipelines/                   # Data ingestion and transformation
-├── sql/                         # PostgreSQL analysis scripts
-├── tests/                       # Pytest test suite
-├── Dockerfile
-├── pyproject.toml / uv.lock
-└── README.md
+│   ├── inference/predict.py      # Dynamic model fetching & inference
+│   ├── routes/api.py             # API endpoints
+│   └── schemas/request_body.py   # Pydantic models
+├── notebooks/                    # EDA and training experiments
+├── pipelines/                    # Data transformation logic
+├── sql/                          # SQL queries for data ingestion
+├── tests/                        # Pytest suite
+├── Dockerfile                    # Containerization
+└── pyproject.toml                # Dependency management (uv)
 
 Local Setup
 
-Python 3.12 and uv required.
+Ensure you have Python 3.12 and uv installed.
+Bash
 
 # Install dependencies
 uv sync --frozen
 
-# Run data transformation
-uv run python pipelines/data_transformation.py
-
 # Start local API
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-Test at http://localhost:8000/docs.
-Docker
+Docker Deployment
+Bash
 
 docker build -t customer-churn-api .
-docker run -p 8000:8000 customer-churn-api
+docker run -p 8000:8000 -e DB_HOST=... -e DB_USER=... customer-churn-api
 
-For FastAPI + MLflow together:
+Environment Variables
 
-docker-compose up --build
+For production deployment, ensure the following variables are configured in your hosting environment:
 
-Tests
-
-uv run pytest tests/
-
+    DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
