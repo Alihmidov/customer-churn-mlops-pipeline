@@ -1,44 +1,44 @@
-Customer Churn Prediction (MLOps Pipeline)
+# Customer Churn Prediction (MLOps Pipeline)
 
 This repository contains an end-to-end Machine Learning pipeline to predict customer churn. The project emphasizes production-ready practices, including containerized deployment, remote model management, and CI/CD automation.
 
-Live API Endpoints
+## Live API Endpoints
 
 The service is deployed on Render and is ready for inference:
 
-    Production Base URL: https://customer-churn-api-pz8n.onrender.com
+- [Production Base URL](https://customer-churn-api-pz8n.onrender.com)
+- [Interactive API Docs (Swagger UI)](https://customer-churn-api-pz8n.onrender.com/docs)
 
-    Interactive API Docs (Swagger UI): https://customer-churn-api-pz8n.onrender.com/docs
+> **Note:** Free tier — first request may take ~60s to wake up.
 
-Architectural Decisions
-Model Management Strategy
+## Architectural Decisions
 
-To ensure a clean repository and follow production best practices, the model is not stored in Git. Instead, it is hosted on Hugging Face Hub and fetched dynamically during the API startup using huggingface_hub. This allows for seamless model updates without re-deploying the entire codebase.
-Why CatBoost?
+### Model Management Strategy
 
-    Categorical features: Native handling of categorical variables removes the need for complex pre-processing.
+To ensure a clean repository and follow production best practices, the model is not stored in Git. Instead, it is hosted on Hugging Face Hub and fetched dynamically during the API startup using `huggingface_hub`. This allows for seamless model updates without re-deploying the entire codebase.
 
-    Robustness: Built-in ordered boosting prevents target leakage and overfitting.
+### Why CatBoost?
 
-    Inference speed: Binary .cbm files are highly optimized for fast, real-time predictions.
+- **Categorical features:** Native handling of categorical variables removes the need for complex pre-processing.
+- **Robustness:** Built-in ordered boosting prevents target leakage and overfitting.
+- **Inference speed:** Binary `.cbm` files are highly optimized for fast, real-time predictions.
 
-Why FastAPI?
+### Why FastAPI?
 
-    High Performance: Async support for concurrent request handling.
+- **High Performance:** Async support for concurrent request handling.
+- **Type Safety:** Pydantic validation ensures incoming payloads match the expected schema.
+- **Documentation:** Auto-generated Swagger UI simplifies integration.
 
-    Type Safety: Pydantic validation ensures incoming payloads match the expected schema.
+## Model Performance
 
-    Documentation: Auto-generated Swagger UI simplifies integration.
+| Metric | Score |
+|--------|-------|
+| Accuracy | 98.72% |
+| ROC AUC Score | 0.9888 |
 
-Model Performance
+## Repository Structure
 
-    Accuracy: 98.72%
-
-    ROC AUC Score: 0.9888
-
-Repository Structure
-Plaintext
-
+```
 customer-churn-mlops-pipeline/
 ├── .github/workflows/main.yml    # CI/CD pipeline
 ├── app/
@@ -51,26 +51,35 @@ customer-churn-mlops-pipeline/
 ├── tests/                        # Pytest suite
 ├── Dockerfile                    # Containerization
 └── pyproject.toml                # Dependency management (uv)
+```
 
-Local Setup
+## Local Setup
 
-Ensure you have Python 3.12 and uv installed.
-Bash
+Ensure you have Python 3.12 and `uv` installed.
 
+```bash
 # Install dependencies
 uv sync --frozen
 
 # Start local API
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-Docker Deployment
-Bash
+## Docker Deployment
 
+```bash
 docker build -t customer-churn-api .
 docker run -p 8000:8000 -e DB_HOST=... -e DB_USER=... customer-churn-api
+```
 
-Environment Variables
+## Environment Variables
 
 For production deployment, ensure the following variables are configured in your hosting environment:
 
-    DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
+| Variable | Description |
+|----------|-------------|
+| `DB_HOST` | Database host |
+| `DB_NAME` | Database name |
+| `DB_USER` | Database user |
+| `DB_PASSWORD` | Database password |
+| `DB_PORT` | Database port |
