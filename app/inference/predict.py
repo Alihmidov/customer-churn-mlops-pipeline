@@ -8,8 +8,8 @@ class ChurnPredictor:
     def __init__(self, model_path: str = None):
         if not model_path:
             model_path = hf_hub_download(
-                repo_id="Alihmidov/customer-churn-catboost", 
-                filename="catboost_model.cbm"
+                repo_id="hmidov-27/customer-churn-catboost", 
+                filename="catboost_churn_model.cbm"
             )
         
         self.model = CatBoostClassifier()
